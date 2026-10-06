@@ -224,3 +224,7 @@ native/fts5_cjk/*.so
 
 # Disposable profile created by scripts/probe_active_session_exclusivity.py
 .probe-home/
+
+# PhantomVeil: literal unexpanded Windows env-var dirs (e.g. %SystemDrive%)
+# created by tools that failed to expand variables. Never commit.
+/%*%/

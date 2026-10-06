@@ -147,7 +147,9 @@ def get_default_hermes_root() -> Path:
     """Root Hermes dir for profile-level ops: ``<root>`` when ``HERMES_HOME=<root>/profiles/<name>``."""
     global _default_hermes_root_memo
     native_home = _get_platform_default_hermes_home()
-    env_home = os.environ.get("HERMES_HOME", "")
+    # Credential resolution may use a native home while session state stays
+    # isolated. Its global auth fallback must follow that same context-local home.
+    env_home = get_hermes_home_override() or os.environ.get("HERMES_HOME", "")
     memo = _default_hermes_root_memo
     if memo is not None and memo[:2] == (str(native_home), env_home):
         return memo[2]
