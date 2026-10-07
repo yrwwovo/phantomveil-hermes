@@ -167,9 +167,10 @@ def test_terminal_waits_without_completion_then_answers_first_user(tmp_path, ent
         assert "未绑定或未经确认时不得请求目标" in system
         assert not any(m["role"] == "assistant" for m in body["messages"])
         names = [tool["function"]["name"] for tool in body["tools"]]
-        assert len(names) == 3
-        assert all(name.endswith(("authorized_target_bind", "authorized_web_observe",
-                                  "evidence_entry_inventory")) for name in names)
+        assert len(names) == 6
+        assert {name.split("__")[-1] for name in names} == {
+            "authorized_target_bind", "authorized_web_observe", "evidence_entry_inventory",
+            "authorized_task_authorize", "authorized_web_crawl", "evidence_input_inventory"}
         runs = tmp_path / "appdata" / "PhantomVeil" / "hermes-chat-runs"
         tasks = list(runs.glob("*/task.json"))
         assert len(tasks) == 1

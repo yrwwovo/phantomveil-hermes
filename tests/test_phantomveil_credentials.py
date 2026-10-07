@@ -162,9 +162,13 @@ def test_no_argument_entry_uses_saved_hermes_key_and_only_restricted_tools(tmp_p
             assert body["model"] == "deepseek-saved-fixture"
             names = {tool["function"]["name"].split("__")[-1] for tool in body.get("tools", [])}
             seen_tools.update(names)
-            assert all(name.endswith(("authorized_target_bind", "authorized_web_observe",
-                                      "evidence_entry_inventory")) for name in names)
-        assert seen_tools, [sorted(body.keys()) for _, body in calls]
+            assert all(name in {
+            "authorized_target_bind", "authorized_web_observe", "evidence_entry_inventory",
+            "authorized_task_authorize", "authorized_web_crawl", "evidence_input_inventory"}
+                for name in names)
+        assert seen_tools == {
+            "authorized_target_bind", "authorized_web_observe", "evidence_entry_inventory",
+            "authorized_task_authorize", "authorized_web_crawl", "evidence_input_inventory"}, sorted(seen_tools)
         for profile in runs.glob("*/profile/config.yaml"):
             assert key not in profile.read_text(encoding="utf-8")
         for log in tmp_path.rglob("*.log"):
