@@ -1,0 +1,13 @@
+{
+  "generated_from": "security-agent-lab",
+  "generator": "scripts/build-hermes-core.mjs",
+  "entrypoints": [
+    "scripts/hermes-chat.js",
+    "src/adapters/hermes/mcp-server.js"
+  ],
+  "assets": [
+    "benchmarks/hermes-eval/profiles/learning-off.yaml",
+    "src/adapters/hermes/phantomveil-agent.md"
+  ],
+  "note": "Generated vendored bundle. Do not edit by hand; rebuild with `npm run build:hermes-core`."
+}

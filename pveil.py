@@ -25,11 +25,20 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     fork_root = Path(__file__).resolve().parent
-    core_root = fork_root.parent / "security-agent-lab"
-    launcher = core_root / "scripts" / "hermes-chat.mjs"
+    override = os.environ.get("PVEIL_HERMES_CORE", "").strip()
+    if override:
+        launcher = Path(override).expanduser()
+    else:
+        launcher = fork_root / "vendor" / "security-core" / "scripts" / "hermes-chat.js"
     if not launcher.is_file():
-        print("PhantomVeil 受限能力项目不可用：缺少 Hermes 启动器。", file=sys.stderr)
+        print(
+            "PhantomVeil 受限能力不可用：缺少打包的 Hermes 启动器。"
+            "请在 security-agent-lab 运行 `npm run build:hermes-core` 生成 vendor/security-core，"
+            "或用 PVEIL_HERMES_CORE 指定开发用的 scripts/hermes-chat.mjs。",
+            file=sys.stderr,
+        )
         return 2
+    core_root = launcher.parent.parent
 
     node = shutil.which("node")
     if node is None:

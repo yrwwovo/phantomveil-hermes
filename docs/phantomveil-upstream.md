@@ -9,12 +9,19 @@ This is a source fork with its own Git history and product branch. Hermes is
 neither vendored into `security-agent-lab` nor held there as a submodule; both
 would make direct product changes and upstream review harder during migration.
 
-This development slice keeps the PhantomVeil TypeScript safety core in the adjacent
-`security-agent-lab` checkout. No-argument `pveil` starts an unbound restricted
-Hermes conversation using this fork's virtual environment. The user describes an
-authorized target in chat; MCP displays its scope and asks for human confirmation
-before binding. No bound target means no permitted target requests. The sibling checkout dependency
-must be packaged into the product before a standalone release.
+The PhantomVeil TypeScript safety core is vendored into this fork as a bundled
+artifact at `vendor/security-core/`. It is built by `security-agent-lab`'s
+`npm run build:hermes-core`, which esbuild-bundles `scripts/hermes-chat.mjs` and
+`src/adapters/hermes/mcp-server.ts` (with their TypeScript and npm dependencies:
+`@modelcontextprotocol/server`, `parse5`, `zod`) into standalone ESM, and copies
+the two runtime assets they read at launch -- `benchmarks/hermes-eval/profiles/learning-off.yaml`
+and `src/adapters/hermes/phantomveil-agent.md`. No-argument `pveil` resolves the
+launcher from `vendor/security-core/scripts/hermes-chat.js` by default and spawns the
+bundled `vendor/security-core/src/adapters/hermes/mcp-server.js` as its restricted
+MCP server. The user describes an authorized target in chat; MCP displays its scope
+and asks for human confirmation before binding. No bound target means no permitted
+target requests. The fork no longer requires an adjacent `security-agent-lab`
+checkout at runtime.
 
 `phantomveil_runtime.py` reuses the official entry's active-profile selection and
 dotenv loading, then calls the same Hermes CLI REPL. Model/provider settings are
@@ -24,6 +31,27 @@ override. The restricted MCP configuration, session state and artifacts remain i
 the isolated PhantomVeil profile. Keys are not copied into that profile, passed on
 the command line, or printed by the adapter. `pveil` and `hermes-chat.ps1` do not
 require a separate `DEEPSEEK_API_KEY` export or force a DeepSeek model route.
+
+## Vendored security core
+
+The committed `vendor/security-core/` tree is generated; do not edit it by hand.
+Rebuild it from `security-agent-lab` whenever the TypeScript core or its assets
+change:
+
+```powershell
+# from the security-agent-lab checkout
+npm install        # once, to get the esbuild devDependency
+npm run build:hermes-core   # writes ../phantomveil-hermes/vendor/security-core/
+```
+
+Override the launcher for development with `PVEIL_HERMES_CORE`, e.g. point it at a
+sibling source checkout's `security-agent-lab/scripts/hermes-chat.mjs` to run the
+un-bundled TypeScript directly. Live target configs are never vendored: the bundle
+ships only code plus the two static assets above. For a standalone install that
+needs the project deny-list cross-check at bind time, set `PVEIL_HERMES_CONFIG_ROOT`
+to a directory containing `configs/scope.local.json` (etc.); when unset, the
+unbound daily session still works and the bind-time source-scope check degrades
+gracefully (missing config dir is treated as "no extra deny-list").
 
 Fetch upstream tags and branches explicitly with `git fetch upstream --tags`.
 Review the changes against `phantomveil/main` before selectively merging or
