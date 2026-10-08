@@ -20,7 +20,11 @@ def main(argv: list[str] | None = None) -> int:
     if args in (["-h"], ["--help"], ["help"]):
         print("pveil [chat]  进入 PhantomVeil Hermes 受限会话")
         return 0
-    if args not in ([], ["chat"]):
+    if args[:1] == ["chat"]:
+        launcher_args = args[1:]
+    elif args == []:
+        launcher_args = []
+    else:
         print("仅支持 pveil 或 pveil chat；不提供 OpenCode 运行时入口。", file=sys.stderr)
         return 2
 
@@ -57,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
     env["PVEIL_HERMES_RUNTIME"] = str(fork_root / "phantomveil_runtime.py")
     try:
         return subprocess.call(
-            [node, str(launcher)],
+            [node, str(launcher), *launcher_args],
             cwd=core_root,
             env=env,
         )
